@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<title>स्वास्थ्य हॉटस्पॉट विश्लेषण — सालारपुर ब्लॉक, बदायूँ</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;font-family:"Segoe UI",Arial,sans-serif}
+
+:root{
+  --ink:#1a1a2e;
+  --bg:#f7f4f0;
+  --card:#fff;
+  --bdr:#ddd8d0;
+  --muted:#666;
+  --nav-h:56px;
+  --bc-h:28px;
+  --c-dia:#B71C1C;
+  --c-tb:#5E35B1;
+  --c-mal:#00695C;
+}
+
+/* ── Nav bar — two-line layout ── */
+#nav{
+  height:var(--nav-h);
+  background:var(--ink);
+  display:flex;align-items:center;
+  padding:0 16px;gap:12px;
+  flex-shrink:0;z-index:10;
+}
+#nav-titles{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}
+#nav-hi{
+  font-size:14px;font-weight:700;color:#fff;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  letter-spacing:.01em;line-height:1.2;
+}
+#nav-en{
+  font-size:12px;font-weight:400;color:rgba(255,255,255,.75);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  line-height:1.2;
+}
+#nav-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+
+/* Lang toggle */
+#lang-toggle{
+  display:flex;border:1px solid rgba(255,255,255,.25);
+  border-radius:5px;overflow:hidden;
+}
+.ltb{
+  padding:4px 10px;font-size:11px;font-weight:600;
+  background:transparent;color:rgba(255,255,255,.55);
+  border:none;cursor:pointer;font-family:inherit;
+  transition:background .15s,color .15s;
+}
+.ltb.active{background:rgba(255,255,255,.18);color:#fff}
+.ltb:hover:not(.active){color:rgba(255,255,255,.85)}
+
+/* Back btn */
+#back-btn{
+  display:none;
+  font-size:11px;color:rgba(255,255,255,.85);
+  background:rgba(255,255,255,.1);
+  border:1px solid rgba(255,255,255,.2);
+  border-radius:5px;padding:4px 12px;
+  cursor:pointer;transition:background .15s;
+  font-family:inherit;
+}
+#back-btn:hover{background:rgba(255,255,255,.2)}
+#back-btn:active{transform:scale(0.97)}
+
+/* Breadcrumb */
+#breadcrumb{
+  display:none;
+  height:var(--bc-h);
+  background:#f0ece6;
+  border-bottom:1px solid var(--bdr);
+  align-items:center;
+  padding:0 14px;gap:6px;
+  font-size:10.5px;color:var(--muted);
+  flex-shrink:0;
+}
+#bc-disease{color:var(--ink);font-weight:600}
+#bc-dot{display:inline-block;width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+/* Home */
+#home{
+  height:calc(100vh - var(--nav-h));
+  background:var(--bg);
+  display:flex;flex-direction:column;
+  overflow:auto;
+}
+
+/* Hero */
+#hero{
+  background:var(--ink);
+  padding:12px 16px 11px;
+  flex-shrink:0;
+  border-bottom:2px solid rgba(255,255,255,.06);
+}
+#hero-hi{
+  font-size:16px;font-weight:700;color:#fff;
+  line-height:1.35;margin-bottom:3px;
+}
+#hero-en{
+  font-size:13px;font-weight:400;color:rgba(255,255,255,.7);
+  line-height:1.4;
+}
+
+/* Cards */
+#cards{
+  flex:1;padding:14px;
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:12px;align-content:start;
+}
+.dis-card{
+  background:var(--card);border-radius:10px;
+  border:1px solid var(--bdr);overflow:hidden;
+  display:flex;flex-direction:column;
+  cursor:pointer;
+  transition:box-shadow .18s,transform .15s;
+}
+.dis-card:hover{box-shadow:0 4px 18px rgba(0,0,0,.12);transform:translateY(-2px)}
+.dis-card:active{transform:scale(0.99)}
+.dis-card:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.card-stripe{height:6px;width:100%;flex-shrink:0}
+.card-body{padding:13px 14px 14px;display:flex;flex-direction:column;flex:1}
+.card-icon{font-size:22px;margin-bottom:6px;line-height:1}
+
+/* Bilingual card names — both visible, neither tiny */
+.card-name-hi{font-size:15px;font-weight:700;color:var(--ink);line-height:1.3}
+.card-name-en{font-size:12px;font-weight:500;color:#444;margin-top:2px}
+
+.card-desc{font-size:11px;color:#555;margin-top:8px;line-height:1.55;flex:1}
+.card-meta{display:flex;gap:5px;flex-wrap:wrap;margin-top:10px}
+.pill{font-size:10px;padding:2px 8px;border-radius:12px;font-weight:600}
+.card-open{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-top:12px;padding:8px 12px;
+  border-radius:6px;border:none;
+  font-size:12px;font-weight:600;color:#fff;
+  cursor:pointer;font-family:inherit;
+  transition:opacity .15s,transform .12s;
+}
+.card-open:hover{opacity:.88}
+.card-open:active{transform:scale(0.98)}
+
+/* Footer */
+#home-footer{
+  background:#f0ece6;border-top:1px solid var(--bdr);
+  padding:7px 16px;display:flex;align-items:center;gap:20px;flex-shrink:0;
+}
+.stat{text-align:center}
+.stat-n{font-size:15px;font-weight:600;color:var(--ink);line-height:1}
+.stat-l{font-size:9px;color:var(--muted);margin-top:1px}
+#footer-tag{flex:1;text-align:right;font-size:9.5px;color:#aaa}
+
+/* CV note */
+#cv-note{
+  font-size:9.5px;color:#999;
+  padding:5px 16px 7px;
+  background:var(--bg);border-top:1px solid var(--bdr);
+  display:flex;gap:12px;flex-wrap:wrap;align-items:center;
+}
+.cv-dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:3px;vertical-align:middle}
+
+/* Viewer */
+#viewer{display:none;flex-direction:column;height:calc(100vh - var(--nav-h))}
+#viewer.active{display:flex}
+#iframe-wrap{flex:1;overflow:hidden}
+#iframe-wrap iframe{width:100%;height:100%;border:none;display:block}
+
+/* Responsive */
+@media(max-width:600px){
+  :root{--nav-h:52px}
+  #nav-en{font-size:11px}
+  #cards{padding:10px;gap:10px}
+  #home-footer{gap:10px}
+  #hero-hi{font-size:14px}
+  #hero-en{font-size:12px}
+}
+@media(max-width:400px){
+  #cards{grid-template-columns:1fr}
+  #nav-en{display:none}
+  :root{--nav-h:44px}
+}
+
+.skip-link{
+  position:absolute;left:-999px;top:4px;
+  background:var(--ink);color:#fff;
+  padding:4px 10px;font-size:12px;z-index:999;border-radius:4px;
+}
+.skip-link:focus{left:8px}
+</style>
+</head>
+<body>
+
+<a class="skip-link" href="#cards">मुख्य सामग्री पर जाएँ / Skip to main content</a>
+
+<!-- ── Nav ── -->
+<nav id="nav" role="navigation" aria-label="Portal navigation">
+  <span aria-hidden="true" style="font-size:20px;flex-shrink:0">🏥</span>
+  <div id="nav-titles">
+    <div id="nav-hi">सालारपुर ब्लॉक — स्वास्थ्य हॉटस्पॉट एवं प्राथमिकता विश्लेषण</div>
+    <div id="nav-en">Salarpur Block · Health Hotspot &amp; Priority Area Analysis · Badaun, UP</div>
+  </div>
+  <div id="nav-right">
+    <div id="lang-toggle" role="group" aria-label="Language toggle">
+      <button class="ltb active" id="lt-hi" onclick="setLang('hi')" aria-pressed="true">हिं</button>
+      <button class="ltb" id="lt-en" onclick="setLang('en')" aria-pressed="false">EN</button>
+    </div>
+    <button id="back-btn" onclick="goHome()" aria-label="Home पर वापस जाएँ">← वापस / Home</button>
+  </div>
+</nav>
+
+<!-- ── Breadcrumb ── -->
+<div id="breadcrumb" role="navigation" aria-label="Breadcrumb" aria-live="polite">
+  <span aria-hidden="true">🏠</span>
+  <span>Portal</span>
+  <span aria-hidden="true" style="color:#bbb">›</span>
+  <span id="bc-disease"></span>
+  <span id="bc-dot"></span>
+  <span id="bc-en" style="color:var(--muted)"></span>
+</div>
+
+<!-- ══════════════ HOME ══════════════ -->
+<main id="home" role="main">
+
+  <div id="hero">
+    <div id="hero-hi">77 ग्राम पंचायत · सालारपुर ब्लॉक, बदायूँ — साक्ष्य-आधारित प्राथमिकता क्षेत्र विश्लेषण</div>
+    <div id="hero-en">Evidence-based hotspot mapping for targeted action planning · GP-level scientific data · Select a disease below</div>
+  </div>
+
+  <div id="cards" role="list">
+
+    <!-- DIARRHOEA -->
+    <article class="dis-card" role="listitem" tabindex="0"
+      onclick="openDashboard('diarrhea')"
+      onkeydown="if(event.key==='Enter'||event.key===' ')openDashboard('diarrhea')"
+      aria-label="डायरिया हॉटस्पॉट विश्लेषण खोलें">
+      <div class="card-stripe" style="background:var(--c-dia)"></div>
+      <div class="card-body">
+        <div class="card-icon" role="img" aria-label="पानी की बूँद">💧</div>
+        <div class="card-name-hi" data-hi="डायरिया हॉटस्पॉट विश्लेषण" data-en="Diarrhoea Hotspot Analysis">डायरिया हॉटस्पॉट विश्लेषण</div>
+        <div class="card-name-en" data-hi="Diarrhoea Hotspot Analysis" data-en="डायरिया हॉटस्पॉट विश्लेषण">Diarrhoea Hotspot Analysis</div>
+        <div class="card-desc" data-hi="U5 रोग भार मानचित्र · JJM जल आपूर्ति लिंकेज · मौसमी वक्र · 77 GP प्राथमिकता तालिका" data-en="U5 disease burden map · JJM water supply linkage · Seasonal epidemic curve · 77 GP priority table">
+          U5 रोग भार मानचित्र · JJM जल आपूर्ति लिंकेज · मौसमी वक्र · 77 GP प्राथमिकता तालिका
+        </div>
+        <div class="card-meta">
+          <span class="pill" style="background:#fdecea;color:#7f1212">जून 2022 – मई 2026</span>
+          <span class="pill" style="background:#f3f0ed;color:#444">U5 केंद्रित</span>
+          <span class="pill" style="background:#f3f0ed;color:#444">JJM</span>
+          <span class="pill" style="background:#f3f0ed;color:#444">e-Kavach</span>
+        </div>
+        <button class="card-open" style="background:var(--c-dia)"
+          onclick="event.stopPropagation();openDashboard('diarrhea')">
+          <span data-hi="हॉटस्पॉट देखें" data-en="View Hotspots">हॉटस्पॉट देखें</span>
+          <span aria-hidden="true">→</span>
+        </button>
+      </div>
+    </article>
+
+    <!-- MALARIA -->
+    <article class="dis-card" role="listitem" tabindex="0"
+      onclick="openDashboard('malaria')"
+      onkeydown="if(event.key==='Enter'||event.key===' ')openDashboard('malaria')"
+      aria-label="मलेरिया हॉटस्पॉट विश्लेषण खोलें">
+      <div class="card-stripe" style="background:var(--c-mal)"></div>
+      <div class="card-body">
+        <div class="card-icon" role="img" aria-label="मच्छर">🦟</div>
+        <div class="card-name-hi" data-hi="मलेरिया हॉटस्पॉट विश्लेषण" data-en="Malaria Hotspot Analysis">मलेरिया हॉटस्पॉट विश्लेषण</div>
+        <div class="card-name-en" data-hi="Malaria Hotspot Analysis" data-en="मलेरिया हॉटस्पॉट विश्लेषण">Malaria Hotspot Analysis</div>
+        <div class="card-desc" data-hi="GP कोरोप्लेथ मानचित्र · वार्षिक प्रवृत्ति · हॉटस्पॉट रैंकिंग · महामारी वक्र" data-en="GP choropleth map · Annual trend · Hotspot ranking · Epidemic curve">
+          GP कोरोप्लेथ मानचित्र · वार्षिक प्रवृत्ति · हॉटस्पॉट रैंकिंग · महामारी वक्र
+        </div>
+        <div class="card-meta">
+          <span class="pill" style="background:#e0f2f1;color:#004d40">2023 – 2025</span>
+          <span class="pill" style="background:#f3f0ed;color:#444">मौसमी</span>
+          <span class="pill" style="background:#f3f0ed;color:#444">e-Kavach</span>
+        </div>
+        <button class="card-open" style="background:var(--c-mal)"
+          onclick="event.stopPropagation();openDashboard('malaria')">
+          <span data-hi="हॉटस्पॉट देखें" data-en="View Hotspots">हॉटस्पॉट देखें</span>
+          <span aria-hidden="true">→</span>
+        </button>
+      </div>
+    </article>
+
+    <!-- TB -->
+    <article class="dis-card" role="listitem" tabindex="0"
+      onclick="openDashboard('tb')"
+      onkeydown="if(event.key==='Enter'||event.key===' ')openDashboard('tb')"
+      aria-label="टीबी हॉटस्पॉट विश्लेषण खोलें">
+      <div class="card-stripe" style="background:var(--c-tb)"></div>
+      <div class="card-body">
+        <div class="card-icon" role="img" aria-label="फेफड़ा">🫁</div>
+        <div class="card-name-hi" data-hi="टीबी (क्षय रोग) — रोगी वितरण विश्लेषण" data-en="TB — Patient Distribution Analysis">टीबी (क्षय रोग) — रोगी वितरण विश्लेषण</div>
+        <div class="card-name-en" data-hi="TB — Patient Distribution Analysis" data-en="टीबी — रोगी वितरण विश्लेषण">TB — Patient Distribution Analysis</div>
+        <div class="card-desc" data-hi="Nikshay डेटा · रोग भार मानचित्र · उपचार परिणाम · GP प्राथमिकता रैंकिंग" data-en="Nikshay data · Burden mapping · Treatment outcomes · GP priority ranking">
+          Nikshay डेटा · रोग भार मानचित्र · उपचार परिणाम · GP प्राथमिकता रैंकिंग
+        </div>
+        <div class="card-meta">
+          <span class="pill" style="background:#ede7f6;color:#311b92">2020 – 2025</span>
+          <span class="pill" style="background:#f3f0ed;color:#444">Nikshay</span>
+          <span class="pill" style="background:#f3f0ed;color:#444">NTEP</span>
+        </div>
+        <button class="card-open" style="background:var(--c-tb)"
+          onclick="event.stopPropagation();openDashboard('tb')">
+          <span data-hi="हॉटस्पॉट देखें" data-en="View Hotspots">हॉटस्पॉट देखें</span>
+          <span aria-hidden="true">→</span>
+        </button>
+      </div>
+    </article>
+
+  </div>
+
+  <div id="cv-note" aria-label="Colour legend">
+    <span style="color:#777;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.05em">रंग / Colors:</span>
+    <span><span class="cv-dot" style="background:var(--c-dia)"></span>लाल = डायरिया</span>
+    <span><span class="cv-dot" style="background:var(--c-mal)"></span>हरा-नीला = मलेरिया</span>
+    <span><span class="cv-dot" style="background:var(--c-tb)"></span>बैंगनी = टीबी</span>
+    <span style="flex:1"></span>
+    <span style="color:#bbb">रंग के साथ नाम भी लिखा है · Labels accompany all colours</span>
+  </div>
+
+  <footer id="home-footer" role="contentinfo">
+    <div class="stat"><div class="stat-n">77</div><div class="stat-l">ग्राम पंचायत / GPs</div></div>
+    <div class="stat"><div class="stat-n">3</div><div class="stat-l">विश्लेषण / Analyses</div></div>
+    <div class="stat"><div class="stat-n">2020–26</div><div class="stat-l">डेटा अवधि</div></div>
+    <div id="footer-tag">CM Fellow · सालारपुर, बदायूँ · साक्ष्य-आधारित प्राथमिकता निर्धारण</div>
+  </footer>
+
+</main>
+
+<!-- ══════════════ VIEWER ══════════════ -->
+<section id="viewer" aria-label="Dashboard viewer">
+  <div id="iframe-wrap">
+    <iframe id="dash-frame" title="Disease hotspot dashboard"
+      allow="fullscreen" loading="lazy"></iframe>
+  </div>
+</section>
+
+<script>
+const DISEASES = {
+  diarrhea:{
+    file:'salarpur_diarrhea_v3_with_jjm.html',
+    nameHi:'डायरिया हॉटस्पॉट विश्लेषण',
+    nameEn:'Diarrhoea Hotspot Analysis',
+    color:'#B71C1C',dot:'#e57373'
+  },
+  malaria:{
+    file:'salarpur_malaria_v1__1_.html',
+    nameHi:'मलेरिया हॉटस्पॉट विश्लेषण',
+    nameEn:'Malaria Hotspot Analysis',
+    color:'#00695C',dot:'#4db6ac'
+  },
+  tb:{
+    file:'TB_Salarpur_Dashboard.html',
+    nameHi:'टीबी — रोगी वितरण विश्लेषण',
+    nameEn:'TB — Patient Distribution Analysis',
+    color:'#5E35B1',dot:'#9575cd'
+  }
+};
+
+let currentLang = 'hi';
+
+const homeEl    = document.getElementById('home');
+const viewerEl  = document.getElementById('viewer');
+const backBtn   = document.getElementById('back-btn');
+const bcEl      = document.getElementById('breadcrumb');
+const bcDisease = document.getElementById('bc-disease');
+const bcDot     = document.getElementById('bc-dot');
+const bcEn      = document.getElementById('bc-en');
+const frame     = document.getElementById('dash-frame');
+
+function setLang(lang) {
+  currentLang = lang;
+  document.getElementById('lt-hi').classList.toggle('active', lang==='hi');
+  document.getElementById('lt-en').classList.toggle('active', lang==='en');
+  document.getElementById('lt-hi').setAttribute('aria-pressed', lang==='hi');
+  document.getElementById('lt-en').setAttribute('aria-pressed', lang==='en');
+
+  // swap all data-hi / data-en elements
+  document.querySelectorAll('[data-hi][data-en]').forEach(el => {
+    el.textContent = el.getAttribute('data-' + lang);
+  });
+
+  // hero
+  const heroHi = document.getElementById('hero-hi');
+  const heroEn = document.getElementById('hero-en');
+  if (lang === 'en') {
+    heroHi.style.fontSize = '13px';
+    heroHi.style.color    = 'rgba(255,255,255,.6)';
+    heroEn.style.fontSize = '15px';
+    heroEn.style.color    = '#fff';
+    heroEn.style.fontWeight = '600';
+  } else {
+    heroHi.style.fontSize = '';
+    heroHi.style.color    = '';
+    heroEn.style.fontSize = '';
+    heroEn.style.color    = '';
+    heroEn.style.fontWeight = '';
+  }
+}
+
+function openDashboard(key) {
+  const d = DISEASES[key];
+  if (!d) return;
+  frame.src = d.file;
+  bcDisease.textContent = d.nameHi;
+  bcEn.textContent = d.nameEn;
+  bcDot.style.background = d.dot;
+  bcDot.setAttribute('aria-hidden','true');
+  homeEl.style.display  = 'none';
+  viewerEl.classList.add('active');
+  viewerEl.style.height = 'calc(100vh - var(--nav-h) - var(--bc-h))';
+  backBtn.style.display = 'inline-block';
+  bcEl.style.display    = 'flex';
+  history.pushState({disease:key}, d.nameHi, '#'+key);
+  document.title = d.nameHi + ' — सालारपुर';
+}
+
+function goHome() {
+  frame.src = 'about:blank';
+  homeEl.style.display  = '';
+  viewerEl.classList.remove('active');
+  backBtn.style.display = 'none';
+  bcEl.style.display    = 'none';
+  history.pushState({}, 'Portal', '#');
+  document.title = 'स्वास्थ्य हॉटस्पॉट विश्लेषण — सालारपुर ब्लॉक, बदायूँ';
+}
+
+window.addEventListener('popstate', function() {
+  const hash = location.hash.replace('#','');
+  if (hash && DISEASES[hash]) openDashboard(hash);
+  else goHome();
+});
+
+(function init() {
+  const hash = location.hash.replace('#','');
+  if (hash && DISEASES[hash]) openDashboard(hash);
+})();
+</script>
+</body>
+</html>
